@@ -1,8 +1,10 @@
 /*
 create a vpc
-create 2 public subnets in different availability zones
-create 1 private subnet in a different availability zone
+create 1 public subnets in different availability zones
+create 2 private subnet in a different availability zone
 create an internet gateway
+create an elastic ip for nat gateway
+create a nat gateway in the public subnet
 create a route table for public subnets
 create a route table for private subnets
 create route table associations for public subnets
@@ -56,6 +58,22 @@ resource "aws_internet_gateway" "cluster-igw" {
   }
 }
 
+resource "aws_eip" "cluster-natgw-eip" {
+  vpc = true
+  tags = {
+    Name = "nat-gateway-eip"
+  }
+}
+
+resource "aws_nat_gateway" "cluster-natgw" {
+  allocation_id = aws_eip.cluster-natgw-eip.id
+  subnet_id     = aws_subnet.cluster-public-subnets[0].id
+
+  tags = {
+    Name = "${var.cluster_name}-nat-gateway"
+  }
+}
+
 resource "aws_route_table" "cluster-public-rtb" {
   vpc_id = aws_vpc.cluster-vpc.id
   tags = {
@@ -80,6 +98,12 @@ resource "aws_route" "public_internet_access" {
   route_table_id         = aws_route_table.cluster-public-rtb.id
   destination_cidr_block = "0.0.0.0/0"
   gateway_id             = aws_internet_gateway.cluster-igw.id
+}
+
+resource "aws_route" "public_internet_access" {
+  route_table_id         = aws_route_table.cluster-private-rtb.id
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = aws_nat_gateway.cluster-natgw.id
 }
 
 resource "aws_route_table_association" "cluster-private-rtb" {
