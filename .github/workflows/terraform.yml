@@ -30,7 +30,7 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::717340753727:role/coimbatore-terraform-ro
           role-session-name: terraform-github-actions
-          aws-region: us-west-2
+          aws-region: ap-south-1
           mask-aws-account-id: false
           role-duration-seconds: 3600  # 1 hour
 
@@ -59,7 +59,7 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::717340753727:role/coimbatore-terraform-rw
           role-session-name: terraform-github-actions
-          aws-region: us-west-2
+          aws-region: ap-south-1
           mask-aws-account-id: false
           role-duration-seconds: 3600  # 1 hour
 
