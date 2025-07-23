@@ -2,7 +2,6 @@
 resource "aws_vpc" "cluster-vpc" {
   cidr_block       = "10.0.0.0/16"
   instance_tenancy = "default"
-  region           = var.region
   tags = {
     Name = "${var.cluster_name}-vpc"
   }
