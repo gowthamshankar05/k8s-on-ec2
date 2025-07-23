@@ -1,3 +1,15 @@
+/*
+create a vpc
+create 2 public subnets in different availability zones
+create 1 private subnet in a different availability zone
+create an internet gateway
+create a route table for public subnets
+create a route table for private subnets
+create route table associations for public subnets
+create route table associations for private subnets
+create a route in the public route table to allow internet access
+*/
+
 
 resource "aws_vpc" "cluster-vpc" {
   cidr_block       = "10.0.0.0/16"
@@ -10,16 +22,29 @@ resource "aws_vpc" "cluster-vpc" {
 data "aws_availability_zones" "zone" {
 }
 
-resource "aws_subnet" "eks-subnets" {
-  count                   = length(var.subnet_cidrs)
+resource "aws_subnet" "cluster-public-subnets" {
+  count                   = length(var.public_subnet_cidrs)
   vpc_id                  = aws_vpc.cluster-vpc.id
-  cidr_block              = var.subnet_cidrs[count.index]
+  cidr_block              = var.public_subnet_cidrs[count.index]
   availability_zone       = data.aws_availability_zones.zone.names[count.index]
   map_public_ip_on_launch = true
 
   tags = {
-    Name                                        = "${var.cluster_name}-subnet-${count.index + 1}"
-    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
+    Name                                        = "${var.cluster_name}-public-subnet-${count.index + 1}"
+    "kubernetes.io/cluster/${var.cluster_name}" = "public"
+  }
+}
+
+resource "aws_subnet" "cluster-private-subnets" {
+  count             = length(var.private_subnet_cidrs)
+  vpc_id            = aws_vpc.cluster-vpc.id
+  cidr_block        = var.private_subnet_cidrs[count.index]
+  availability_zone = data.aws_availability_zones.zone.names[count.index + length(var.public_subnet_cidrs)]
+  # Ensure private subnets are in different AZs than public subnets
+
+  tags = {
+    Name                                        = "${var.cluster_name}-private-subnet-${count.index + 1}"
+    "kubernetes.io/cluster/${var.cluster_name}" = "private"
   }
 }
 
@@ -31,26 +56,34 @@ resource "aws_internet_gateway" "cluster-igw" {
   }
 }
 
-resource "aws_route_table" "cluster-rtb" {
-  count  = length(aws_subnet.eks-subnets)
+resource "aws_route_table" "cluster-public-rtb" {
   vpc_id = aws_vpc.cluster-vpc.id
-
-  route {
-    cidr_block           = aws_subnet.eks-subnets[count.index].cidr_block
-    network_interface_id = aws_network_interface.cluster-nif[count.index].id
-  }
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.cluster-igw.id
+  tags = {
+    Name = "${var.cluster_name}-public-route-table"
   }
 }
 
-resource "aws_network_interface" "cluster-nif" {
-  count     = length(aws_subnet.eks-subnets)
-  subnet_id = aws_subnet.eks-subnets[count.index].id
-
+resource "aws_route_table" "cluster-private-rtb" {
+  vpc_id = aws_vpc.cluster-vpc.id
   tags = {
-    Name = "${var.cluster_name}-nif-${count.index + 1}"
+    Name = "${var.cluster_name}-public-private-table"
   }
+}
+
+resource "aws_route_table_association" "cluster-public-rtb" {
+  count          = length(aws_subnet.cluster-public-subnets)
+  subnet_id      = aws_subnet.cluster-public-subnets[count.index].id
+  route_table_id = aws_route_table.cluster-public-rtb.id
+}
+
+resource "aws_route" "public_internet_access" {
+  route_table_id         = aws_route_table.cluster-public-rtb.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.cluster-igw.id
+}
+
+resource "aws_route_table_association" "cluster-private-rtb" {
+  count          = length(aws_subnet.cluster-private-subnets)
+  subnet_id      = aws_subnet.cluster-private-subnets[count.index].id
+  route_table_id = aws_route_table.cluster-private-rtb.id
 }
