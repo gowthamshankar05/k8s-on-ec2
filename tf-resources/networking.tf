@@ -100,7 +100,7 @@ resource "aws_route" "public_internet_access" {
   gateway_id             = aws_internet_gateway.cluster-igw.id
 }
 
-resource "aws_route" "public_internet_access" {
+resource "aws_route" "private_internet_access" {
   route_table_id         = aws_route_table.cluster-private-rtb.id
   destination_cidr_block = "0.0.0.0/0"
   nat_gateway_id         = aws_nat_gateway.cluster-natgw.id
