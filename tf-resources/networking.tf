@@ -37,7 +37,7 @@ resource "aws_route_table" "cluster-rtb" {
 
   route {
     cidr_block           = aws_vpc.test.cidr_block
-    network_interface_id = aws_network_interface.nif[count.index].id
+    network_interface_id = aws_network_interface.cluster-nif[count.index].id
   }
 
   route {
