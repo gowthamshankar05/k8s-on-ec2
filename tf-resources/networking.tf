@@ -22,3 +22,11 @@ resource "aws_subnet" "eks-subnets" {
     "kubernetes.io/cluster/${var.cluster_name}" = "shared"
   }
 }
+
+resource "aws_internet_gateway" "cluster-igw" {
+  vpc_id = aws_vpc.cluster-vpc.id
+
+  tags = {
+    Name = "${var.cluster_name}-igw"
+  }
+}
