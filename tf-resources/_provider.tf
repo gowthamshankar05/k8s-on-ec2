@@ -18,6 +18,6 @@ terraform {
     key            = "terraform.tfstate"
     encrypt        = true
     dynamodb_table = "coimbatore-tf-state-dynamo-db"
-    region         = var.region
+    region         = "ap-south-1"
   }
 }
