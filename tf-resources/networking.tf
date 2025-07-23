@@ -7,11 +7,14 @@ resource "aws_vpc" "cluster-vpc" {
   }
 }
 
+data "aws_availability_zones" "zone" {
+}
+
 resource "aws_subnet" "eks-subnets" {
   count                   = length(var.subnet_cidrs)
   vpc_id                  = aws_vpc.cluster-vpc.id
   cidr_block              = var.subnet_cidrs[count.index]
-  availability_zone       = data.aws_availability_zones.available.names[count.index]
+  availability_zone       = data.aws_availability_zones.zone.names[count.index]
   map_public_ip_on_launch = true
 
   tags = {
