@@ -16,7 +16,7 @@ data "aws_ami" "cluster-ami" {
 }
 
 resource "aws_instance" "bastion" {
-  ami                         = data.aws_ami.ubuntu.id
+  ami                         = data.aws_ami.cluster-ami.id
   instance_type               = "t2.medium"
   key_name                    = aws_key_pair.deployer.key_name
   subnet_id                   = aws_subnet.cluster-public-subnets[0].id
