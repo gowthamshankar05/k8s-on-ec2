@@ -32,7 +32,7 @@ resource "aws_instance" "control_plane" {
   ami                         = data.aws_ami.cluster-ami.id
   instance_type               = "t2.medium"
   key_name                    = aws_key_pair.ssh_key.key_name
-  subnet_id                   = aws_subnet.cluster-private-subnets[count.index].id
+  subnet_id                   = aws_subnet.cluster-private-subnets[0].id
   vpc_security_group_ids      = [aws_security_group.control-plane-sg.id]
   associate_public_ip_address = false
 
