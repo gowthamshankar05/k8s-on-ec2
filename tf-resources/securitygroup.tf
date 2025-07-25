@@ -9,7 +9,7 @@ resource "aws_security_group" "bastion-sg" {
   }
 
   ingress {
-    cidr_blocks = [aws_vpc.cluster-vpc.cidr_block]
+    cidr_blocks = ["49.47.217.245/32"]
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
