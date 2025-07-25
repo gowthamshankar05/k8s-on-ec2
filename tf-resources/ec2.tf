@@ -21,7 +21,7 @@ resource "aws_instance" "bastion" {
   key_name                    = aws_key_pair.ssh_key.key_name
   subnet_id                   = aws_subnet.cluster-public-subnets[0].id
   associate_public_ip_address = true
-  vpc_security_group_ids      = [aws_security_group.control-plane-sg.id]
+  vpc_security_group_ids      = [aws_security_group.bastion-sg.id]
 
   tags = {
     Name = "${var.cluster_name}-bastion"
