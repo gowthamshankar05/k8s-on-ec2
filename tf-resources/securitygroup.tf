@@ -33,7 +33,7 @@ resource "aws_security_group" "control-plane-sg" {
   }
 
   ingress {
-    cidr_blocks = ["${aws_instance.bastion.public_ip}/32"]
+    cidr_blocks = ["${aws_instance.bastion.private_ip}/32"]
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
@@ -79,7 +79,7 @@ resource "aws_security_group" "worker-sg" {
   }
 
   ingress {
-    cidr_blocks = ["${aws_instance.bastion.public_ip}/32"]
+    cidr_blocks = ["${aws_instance.bastion.private_ip}/32"]
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
