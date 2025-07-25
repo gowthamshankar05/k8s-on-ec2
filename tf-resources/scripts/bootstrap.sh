@@ -1,3 +1,7 @@
+#!/bin/bash
+exec > /var/log/user-data.log 2>&1
+set -o xtrace
+
 echo "Make script executable using chmod u+x FILE_NAME.sh"
 
 echo "Containerd installation script"
